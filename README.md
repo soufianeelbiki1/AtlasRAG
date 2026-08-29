@@ -97,7 +97,7 @@ The first milestone uses deterministic in-memory retrieval so the domain and API
 - [x] architecture and product contract
 - [ ] query API with deterministic retrieval
 - [ ] citation-first response model
-- [ ] evaluation primitives
+- [x] evaluation primitives (precision/recall@k and MRR)
 - [ ] PostgreSQL + pgvector persistence
 - [ ] document ingestion + chunking pipeline
 - [ ] hybrid lexical/vector search
