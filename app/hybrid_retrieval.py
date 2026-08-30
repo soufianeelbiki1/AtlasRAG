@@ -133,14 +133,9 @@ class TermCoverageReranker:
         scored: list[tuple[float, int, EvidenceChunk]] = []
         for index, chunk in enumerate(candidates):
             chunk_terms = {term for term in chunk.text.lower().split() if term}
-            coverage = (
-                len(query_terms & chunk_terms) / len(query_terms)
-                if query_terms
-                else 0.0
-            )
+            coverage = len(query_terms & chunk_terms) / len(query_terms) if query_terms else 0.0
             combined = (
-                self._retrieval_weight * chunk.score
-                + (1.0 - self._retrieval_weight) * coverage
+                self._retrieval_weight * chunk.score + (1.0 - self._retrieval_weight) * coverage
             )
             scored.append(
                 (
