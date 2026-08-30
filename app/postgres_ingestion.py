@@ -23,8 +23,10 @@ class PostgresIngestionStore:
         document_fingerprint = fingerprint_text(document.text)
         candidate_chunks = self.chunker.chunk(document)
 
-        with psycopg.connect(self.database_url) as connection:
-            with connection.cursor() as cursor:
+        with (
+            psycopg.connect(self.database_url) as connection,
+            connection.cursor() as cursor,
+        ):
                 cursor.execute(
                     "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))",
                     (document.document_id,),
