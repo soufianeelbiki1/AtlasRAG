@@ -64,10 +64,14 @@ def test_concurrent_replay_creates_one_document_and_one_chunk_set() -> None:
     )
 
     def ingest_once() -> bool:
-        return PostgresIngestionStore(
-            DATABASE_URL,
-            DeterministicChunker(max_chars=100),
-        ).ingest(document).replayed
+        return (
+            PostgresIngestionStore(
+                DATABASE_URL,
+                DeterministicChunker(max_chars=100),
+            )
+            .ingest(document)
+            .replayed
+        )
 
     with ThreadPoolExecutor(max_workers=4) as executor:
         replayed = list(executor.map(lambda _: ingest_once(), range(4)))
