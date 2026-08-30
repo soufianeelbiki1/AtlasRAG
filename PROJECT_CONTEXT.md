@@ -5,6 +5,8 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 ## Current state
 
 - Deterministic lexical retriever behind a `Retriever` protocol.
+- Hybrid retrieval orchestration with reciprocal-rank fusion across heterogeneous retriever ports, explicit cross-source chunk identity checks, and a separate reranker port.
+- Credential-free term-coverage reference reranker exercises the reranking contract in CI without being presented as a production semantic model.
 - Pydantic query, evidence, citation, and response contracts.
 - Retrieval evaluation primitives including precision/recall@k and MRR.
 - Citation-first query application service with configurable minimum evidence threshold.
@@ -36,7 +38,8 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 - [x] deterministic generator/provider port
 - [x] document ingestion/chunking contracts with replay-safe document identity
 - [x] durable PostgreSQL document/chunk persistence and ingestion idempotency
-- [ ] hybrid lexical/vector retrieval and reranking
+- [x] hybrid rank-fusion and reranking orchestration behind retriever ports
+- [ ] measured semantic/vector retrieval adapter (for example PostgreSQL/pgvector)
 - [ ] regression evaluation dataset with groundedness/answer-relevance scoring
 - [ ] provider adapters with token/cost/latency accounting
 - [ ] durable background ingestion jobs
@@ -45,4 +48,4 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 
 ## Next highest-value task
 
-Add a regression evaluation dataset that exercises retrieval and grounded-answer behavior without external model credentials, then introduce hybrid lexical/vector retrieval behind the existing retriever contract. Keep persistence, retrieval, generation, and evaluation metrics separable.
+Add a versioned regression dataset covering hybrid retrieval and grounded-answer behavior, then implement a measured semantic/vector adapter behind the existing retriever port. Keep backend raw-score calibration out of fusion by default and preserve separate retrieval/generation metrics.
