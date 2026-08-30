@@ -3,8 +3,8 @@ import pytest
 from app.ingestion import (
     DeterministicChunker,
     DocumentInput,
-    InMemoryIngestionStore,
     IngestionConflictError,
+    InMemoryIngestionStore,
     fingerprint_text,
 )
 
