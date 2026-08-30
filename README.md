@@ -95,11 +95,11 @@ The first milestone uses deterministic in-memory retrieval so the domain and API
 ## Roadmap
 
 - [x] architecture and product contract
-- [ ] query API with deterministic retrieval
-- [ ] citation-first response model
+- [x] query API with deterministic retrieval
+- [x] citation-first response model
 - [x] evaluation primitives (precision/recall@k and MRR)
-- [ ] PostgreSQL + pgvector persistence
-- [ ] document ingestion + chunking pipeline
+- [ ] PostgreSQL + pgvector retrieval persistence
+- [x] durable PostgreSQL document ingestion + deterministic chunking
 - [ ] hybrid lexical/vector search
 - [ ] reranking
 - [ ] OpenAI/compatible provider adapter

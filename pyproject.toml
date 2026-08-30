@@ -12,6 +12,7 @@ dependencies = [
   "fastapi>=0.116,<1.0",
   "uvicorn[standard]>=0.35,<1.0",
   "pydantic>=2.11,<3.0",
+  "psycopg[binary]>=3.2,<4.0",
 ]
 
 [project.optional-dependencies]
@@ -30,3 +31,7 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+exclude = ["migrations*"]

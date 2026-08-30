@@ -11,6 +11,22 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: atlasrag
+          POSTGRES_PASSWORD: atlasrag
+          POSTGRES_DB: atlasrag
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atlasrag -d atlasrag"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://atlasrag:atlasrag@localhost:5432/atlasrag
     strategy:
       fail-fast: false
       matrix:
