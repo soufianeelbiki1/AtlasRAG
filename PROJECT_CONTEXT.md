@@ -13,6 +13,7 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 - FastAPI `/health` and `/v1/query` reference endpoints.
 - Deterministic ingestion contract with normalized SHA-256 document fingerprints, stable content-derived chunk IDs, provenance source, and ordered chunk ordinals.
 - Reference ingestion store treats exact replay as a no-op result and rejects stable document IDs reused for changed normalized content.
+- PostgreSQL ingestion store persists document fingerprints and deterministic chunks behind unique constraints, serializes concurrent retries per document ID with a transaction-scoped advisory lock, and reconstructs replay results from durable rows.
 - Tests cover retrieval, evaluation, grounded citations, abstention, API validation, chunk determinism, replay, and ingestion conflicts.
 - CI runs lint, formatting, compilation, and tests without external AI credentials.
 
@@ -34,7 +35,7 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 - [x] evidence-threshold abstention
 - [x] deterministic generator/provider port
 - [x] document ingestion/chunking contracts with replay-safe document identity
-- [ ] durable PostgreSQL document/chunk persistence and ingestion idempotency
+- [x] durable PostgreSQL document/chunk persistence and ingestion idempotency
 - [ ] hybrid lexical/vector retrieval and reranking
 - [ ] regression evaluation dataset with groundedness/answer-relevance scoring
 - [ ] provider adapters with token/cost/latency accounting
@@ -44,4 +45,4 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 
 ## Next highest-value task
 
-Persist deterministic document fingerprints and chunks durably in PostgreSQL with unique constraints for replay safety. Keep the stable chunk/retriever contracts, then add a regression evaluation dataset that exercises retrieval and grounded-answer behavior without external model credentials.
+Add a regression evaluation dataset that exercises retrieval and grounded-answer behavior without external model credentials, then introduce hybrid lexical/vector retrieval behind the existing retriever contract. Keep persistence, retrieval, generation, and evaluation metrics separable.
