@@ -9,6 +9,7 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 - Credential-free term-coverage reference reranker exercises the reranking contract in CI without being presented as a production semantic model.
 - Pydantic query, evidence, citation, and response contracts.
 - Retrieval evaluation primitives including precision/recall@k and MRR.
+- Versioned credential-free RAG regression dataset with separate application metrics for citation precision/recall, abstention accuracy, answer support by cited evidence, and expected-term recall; these are not presented as model-based semantic groundedness scores.
 - Citation-first query application service with configurable minimum evidence threshold.
 - Explicit abstention when retrieved evidence is absent/weak or grounded content is empty.
 - `AnswerGenerator` provider port plus deterministic extractive reference generator.
@@ -40,7 +41,7 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 - [x] durable PostgreSQL document/chunk persistence and ingestion idempotency
 - [x] hybrid rank-fusion and reranking orchestration behind retriever ports
 - [ ] measured semantic/vector retrieval adapter (for example PostgreSQL/pgvector)
-- [ ] regression evaluation dataset with groundedness/answer-relevance scoring
+- [x] versioned regression dataset with citation/support/abstention/answer-term metrics
 - [ ] provider adapters with token/cost/latency accounting
 - [ ] durable background ingestion jobs
 - [ ] multi-tenant isolation
@@ -48,4 +49,4 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 
 ## Next highest-value task
 
-Add a versioned regression dataset covering hybrid retrieval and grounded-answer behavior, then implement a measured semantic/vector adapter behind the existing retriever port. Keep backend raw-score calibration out of fusion by default and preserve separate retrieval/generation metrics.
+Implement a measured semantic/vector adapter behind the existing retriever port and evaluate it against the versioned regression dataset. Then add provider token/cost/latency accounting while preserving separate retrieval, citation-support, and model-quality metrics.
