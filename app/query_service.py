@@ -34,9 +34,7 @@ class QueryService:
 
     def query(self, request: QueryRequest) -> QueryResponse:
         retrieved = self._retriever.search(request.question, request.top_k)
-        evidence = [
-            chunk for chunk in retrieved if chunk.score >= self._minimum_evidence_score
-        ]
+        evidence = [chunk for chunk in retrieved if chunk.score >= self._minimum_evidence_score]
         if not evidence:
             return QueryResponse(
                 answer="I do not have enough retrieved evidence to answer this question.",
