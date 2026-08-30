@@ -11,7 +11,9 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 - Explicit abstention when retrieved evidence is absent/weak or grounded content is empty.
 - `AnswerGenerator` provider port plus deterministic extractive reference generator.
 - FastAPI `/health` and `/v1/query` reference endpoints.
-- Tests cover retrieval, evaluation, grounded citations, abstention, and API validation.
+- Deterministic ingestion contract with normalized SHA-256 document fingerprints, stable content-derived chunk IDs, provenance source, and ordered chunk ordinals.
+- Reference ingestion store treats exact replay as a no-op result and rejects stable document IDs reused for changed normalized content.
+- Tests cover retrieval, evaluation, grounded citations, abstention, API validation, chunk determinism, replay, and ingestion conflicts.
 - CI runs lint, formatting, compilation, and tests without external AI credentials.
 
 ## Guardrails
@@ -31,7 +33,8 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 - [x] citation-first query service
 - [x] evidence-threshold abstention
 - [x] deterministic generator/provider port
-- [ ] document ingestion/chunking contracts with replay-safe document identity
+- [x] document ingestion/chunking contracts with replay-safe document identity
+- [ ] durable PostgreSQL document/chunk persistence and ingestion idempotency
 - [ ] hybrid lexical/vector retrieval and reranking
 - [ ] regression evaluation dataset with groundedness/answer-relevance scoring
 - [ ] provider adapters with token/cost/latency accounting
@@ -41,4 +44,4 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 
 ## Next highest-value task
 
-Add a deterministic ingestion/chunking pipeline with stable document fingerprints, chunk identities, duplicate/replay handling, and provenance metadata. Then add regression evaluation datasets that exercise retrieval and grounded-answer behavior without external model credentials.
+Persist deterministic document fingerprints and chunks durably in PostgreSQL with unique constraints for replay safety. Keep the stable chunk/retriever contracts, then add a regression evaluation dataset that exercises retrieval and grounded-answer behavior without external model credentials.
