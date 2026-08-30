@@ -49,8 +49,9 @@ def test_rrf_combines_rankings_without_comparing_raw_backend_scores() -> None:
 
     assert [item.id for item in results] == ["b", "a", "c"]
     assert results[0].score == pytest.approx(1.0)
-    assert 0.0 < results[1].score <= 1.0
-    assert results[1].score == results[2].score
+    assert 0.0 < results[2].score < results[1].score <= 1.0
+    assert results[1].score == pytest.approx((1 / 11) / ((1 / 12) + (1 / 11)))
+    assert results[2].score == pytest.approx((1 / 12) / ((1 / 12) + (1 / 11)))
 
 
 def test_rrf_rejects_conflicting_chunk_identity_across_sources() -> None:
