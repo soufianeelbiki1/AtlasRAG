@@ -1,96 +1,51 @@
 # AtlasRAG
 
-**Evaluation-driven RAG engineering with durable ingestion, citation-first answers, abstention, hybrid rank fusion, reranking, and provider cost/latency accounting.**
+AtlasRAG is a FastAPI RAG backend with durable document ingestion, citation-aware responses, abstention on weak evidence, hybrid rank fusion, reranking hooks and regression evaluation.
 
-AtlasRAG is the applied AI/LLM flagship in this portfolio. It focuses on the engineering around retrieval-augmented generation rather than a generic chat-with-PDFs demo: retrieval contracts, ingestion idempotency, measurable evaluation, citation support, weak-evidence abstention, provider boundaries, and operational cost/latency visibility.
+The repository is built so retrieval, generation and evaluation can be tested independently. The default test path is deterministic and does not require paid model credentials.
 
-> This repository is a reference implementation using deterministic test paths and synthetic/versioned evaluation data. It does not claim production traffic, proprietary corpora, semantic-vector quality, or compliance certification.
-
-## What is implemented
-
-- FastAPI `/health` and `/v1/query` endpoints with typed Pydantic contracts.
-- Citation-first query service with configurable minimum-evidence threshold.
-- Explicit abstention when evidence is absent, too weak, or cannot support a grounded response path.
-- Deterministic lexical retriever behind a stable `Retriever` protocol.
-- Hybrid retrieval orchestration using reciprocal-rank fusion across heterogeneous retriever ports.
-- Cross-source chunk identity validation and a separate reranker port.
-- Credential-free term-coverage reference reranker used to exercise the reranking contract in CI without pretending it is a production semantic model.
-- Retrieval evaluation primitives including precision@k, recall@k, and MRR.
-- Versioned RAG regression dataset with application-level citation precision/recall, abstention accuracy, expected-term recall, and answer-support checks.
-- `AnswerGenerator` provider abstraction plus deterministic extractive reference generator.
-- Deterministic ingestion with normalized SHA-256 document fingerprints, stable content-derived chunk IDs, provenance, and chunk ordinals.
-- Durable PostgreSQL ingestion store with uniqueness constraints and transaction-scoped advisory locking for replay-safe concurrent retries.
-- Exact document replay reconstructed from durable rows; changed content under a stable document ID is rejected rather than silently overwritten.
-- Provider usage accounting for token consumption, estimated cost, and latency without embedding vendor logic into the application layer.
-- Automated tests and GitHub Actions CI with no external AI credentials required.
-
-## Architecture
+## Query path
 
 ```text
-Documents
-   |
-   v
-Normalization + fingerprinting
-   |
-   v
-Deterministic chunking
-   |
-   +--> durable PostgreSQL document/chunk store
-   |
-   v
-Retriever ports
-   | lexical reference retrieval
-   | future semantic/vector adapters
-   |
-   v
-Reciprocal-rank fusion
-   |
-   v
-Reranker port
-   |
-   v
-Evidence threshold
-   | weak evidence -> abstain
-   | sufficient evidence
-   v
-AnswerGenerator provider port
-   |
-   v
-Citation-first response
-   |
-   +--> evaluation metrics
-   +--> usage / latency / cost accounting
+question
+  -> retriever(s)
+  -> reciprocal-rank fusion
+  -> reranker
+  -> evidence threshold
+  -> answer generator
+  -> citations + usage metrics
 ```
 
-The semantic/vector adapter is deliberately still an extension point. The repository does not claim pgvector quality merely because the architecture has a retrieval port for it.
+If the retrieved evidence is missing or too weak, the query service abstains instead of producing an unsupported answer.
 
-## Trust and evaluation
+## Retrieval and evaluation
 
-AtlasRAG keeps different quality questions separate:
+- lexical reference retriever behind a `Retriever` protocol;
+- reciprocal-rank fusion across multiple retriever ports;
+- separate reranker interface;
+- precision@k, recall@k and MRR;
+- versioned regression data for citation precision/recall, abstention behavior, expected answer terms and evidence support.
 
-- **retrieval quality** — precision/recall@k and MRR;
-- **citation quality** — whether cited chunks correspond to expected evidence;
-- **abstention behavior** — whether weak/insufficient evidence produces a refusal to fabricate support;
-- **answer support** — whether the generated answer content is supported by cited evidence under the repository's deterministic evaluation rules;
-- **provider operations** — token use, estimated cost, and latency.
+A semantic/vector retriever is not implemented yet, so the repository does not present hybrid orchestration as measured vector-search quality.
 
-These application metrics are intentionally not labeled as model-based semantic groundedness scores.
+## Durable ingestion
 
-## Durable ingestion semantics
+Documents are normalized and fingerprinted with SHA-256. Chunk IDs are derived deterministically from content and position.
 
-Document identity is based on normalized content fingerprints and stable document IDs. The PostgreSQL implementation protects concurrent retries with an advisory lock and database constraints:
+The PostgreSQL ingestion store uses database constraints and a transaction-scoped advisory lock so concurrent retries for the same document ID are serialized. Replaying the same normalized content reconstructs the stored result; reusing a stable document ID with changed content returns a conflict.
+
+## Provider accounting
+
+The answer-generator boundary records provider-reported token usage, estimated cost and latency without coupling the application layer to one provider.
+
+## API
 
 ```text
-same document ID + same normalized content
-    -> replay-safe no-op / durable reconstruction
-
-same document ID + changed normalized content
-    -> explicit conflict
+GET  /health
+POST /v1/query
 ```
 
-This is a bounded idempotency claim for repository ingestion, not an "exactly once" claim across arbitrary external systems.
-
-## Run locally
+## Run and test
 
 ```bash
 python -m pip install -e '.[dev]'
@@ -99,24 +54,22 @@ ruff format --check .
 pytest -q
 ```
 
-The deterministic CI path requires no paid LLM or embedding-provider credentials.
+CI runs without external LLM or embedding credentials.
 
-## Portfolio signal
+## Limitations
 
-AtlasRAG demonstrates:
+- semantic/vector retrieval is still an extension point;
+- background ingestion jobs are not durable yet;
+- tenant isolation is not implemented yet;
+- regression metrics are application-level checks, not a claim of general semantic groundedness.
 
-- RAG/LLM system design beyond API wrappers;
-- durable ingestion and idempotency reasoning;
-- information-retrieval evaluation;
-- hybrid rank fusion and reranker abstractions;
-- citation/abstention product semantics;
-- provider-agnostic architecture;
-- cost and latency accounting;
-- explicit claim boundaries and reproducible regression testing.
+## Roadmap
 
-## Next engineering milestone
-
-Implement a measured semantic/vector retriever behind the existing port, evaluate it against the versioned regression dataset, and add durable background ingestion plus tenant isolation before claiming those capabilities.
+1. Add a measured semantic/vector retriever and compare it against the regression dataset.
+2. Add durable background ingestion jobs.
+3. Add tenant isolation at persistence and retrieval boundaries.
+4. Add an evaluation/demo view for evidence, citations, abstention and provider usage.
+5. Add OpenTelemetry metrics and traces around ingestion and query execution.
 
 ## License
 
