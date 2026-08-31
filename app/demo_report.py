@@ -142,7 +142,10 @@ def build_demo_report_html() -> str:
   <h2>Regression cases</h2>
   <table>
     <thead>
-      <tr><th>Question</th><th>Expected evidence</th><th>Result</th><th>Citations</th><th>Answer</th></tr>
+      <tr>
+        <th>Question</th><th>Expected evidence</th><th>Result</th>
+        <th>Citations</th><th>Answer</th>
+      </tr>
     </thead>
     <tbody>{''.join(case_rows)}</tbody>
   </table>
@@ -150,9 +153,10 @@ def build_demo_report_html() -> str:
 <section class="panel">
   <h2>What these numbers mean</h2>
   <p class="sub">
-    Citation metrics compare returned chunk IDs with hand-authored expected evidence. Supported-answer
-    rate checks whether the deterministic extractive answer is contained in cited evidence. These are
-    application regression metrics, not model-based semantic groundedness scores.
+    Citation metrics compare returned chunk IDs with hand-authored expected evidence.
+    Supported-answer rate checks whether the deterministic extractive answer is contained
+    in cited evidence. These are application regression metrics, not model-based semantic
+    groundedness scores.
   </p>
   <p class="note">{escape(RAG_REGRESSION_DATASET_PROVENANCE)}</p>
 </section>
