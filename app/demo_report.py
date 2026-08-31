@@ -86,12 +86,13 @@ def build_demo_report_html() -> str:
     case_rows: list[str] = []
     for case in RAG_REGRESSION_EXAMPLES:
         response = service.query(QueryRequest(question=case.question, top_k=4))
-        citations = "".join(
-            '<span class="citation">'
-            f"{escape(citation.chunk_id)} · {citation.score:.2f}"
-            "</span>"
-            for citation in response.citations
-        ) or "—"
+        citations = (
+            "".join(
+                f'<span class="citation">{escape(citation.chunk_id)} · {citation.score:.2f}</span>'
+                for citation in response.citations
+            )
+            or "—"
+        )
         expected = "abstain" if case.should_abstain else ", ".join(sorted(case.relevant_ids))
         badge_class = "badge-yes" if response.grounded else "badge-no"
         case_rows.append(
@@ -147,7 +148,7 @@ def build_demo_report_html() -> str:
         <th>Citations</th><th>Answer</th>
       </tr>
     </thead>
-    <tbody>{''.join(case_rows)}</tbody>
+    <tbody>{"".join(case_rows)}</tbody>
   </table>
 </section>
 <section class="panel">
