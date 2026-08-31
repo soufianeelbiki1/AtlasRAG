@@ -156,8 +156,7 @@ def build_demo_report_html() -> str:
   <p class="sub">
     Citation metrics compare returned chunk IDs with hand-authored expected evidence.
     Supported-answer rate checks whether the deterministic extractive answer is contained
-    in cited evidence. These are application regression metrics, not model-based semantic
-    groundedness scores.
+    in cited evidence. These are application regression metrics, not model-based semantic groundedness scores.
   </p>
   <p class="note">{escape(RAG_REGRESSION_DATASET_PROVENANCE)}</p>
 </section>
