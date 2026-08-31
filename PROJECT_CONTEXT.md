@@ -1,6 +1,6 @@
 # AtlasRAG project context
 
-AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate measurable retrieval quality, citation-first responses, abstention under weak evidence, provider boundaries, deterministic evaluation, ingestion reliability, tenancy, cost/latency visibility, and explicit failure handling without claiming proprietary data or production traffic.
+AtlasRAG is the applied AI/LLM engineering flagship. It should demonstrate measurable retrieval quality, citation-first responses, abstention under weak evidence, provider boundaries, deterministic evaluation, ingestion reliability, tenancy, cost/latency visibility, and explicit failure handling without claiming proprietary data or production traffic.
 
 ## Current state
 
@@ -13,11 +13,12 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 - Citation-first query application service with configurable minimum evidence threshold.
 - Explicit abstention when retrieved evidence is absent/weak or grounded content is empty.
 - `AnswerGenerator` provider port plus deterministic extractive reference generator.
+- Provider usage accounting for token consumption, estimated cost, and latency behind provider-neutral application boundaries.
 - FastAPI `/health` and `/v1/query` reference endpoints.
 - Deterministic ingestion contract with normalized SHA-256 document fingerprints, stable content-derived chunk IDs, provenance source, and ordered chunk ordinals.
 - Reference ingestion store treats exact replay as a no-op result and rejects stable document IDs reused for changed normalized content.
 - PostgreSQL ingestion store persists document fingerprints and deterministic chunks behind unique constraints, serializes concurrent retries per document ID with a transaction-scoped advisory lock, and reconstructs replay results from durable rows.
-- Tests cover retrieval, evaluation, grounded citations, abstention, API validation, chunk determinism, replay, and ingestion conflicts.
+- Tests cover retrieval, evaluation, grounded citations, abstention, API validation, chunk determinism, replay, ingestion conflicts, reranking, and provider usage accounting.
 - CI runs lint, formatting, compilation, and tests without external AI credentials.
 
 ## Guardrails
@@ -29,6 +30,7 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 5. Multi-tenant identifiers must be enforced in persistence/retrieval boundaries before tenancy is claimed.
 6. Cost/latency claims require measured traces rather than invented numbers.
 7. Ingestion retries need durable idempotency before being described as production-grade.
+8. Hybrid orchestration does not imply semantic/vector retrieval exists; measured vector quality must be demonstrated separately.
 
 ## Priority sequence
 
@@ -42,11 +44,11 @@ AtlasRAG is the production AI/LLM engineering flagship. It should demonstrate me
 - [x] hybrid rank-fusion and reranking orchestration behind retriever ports
 - [ ] measured semantic/vector retrieval adapter (for example PostgreSQL/pgvector)
 - [x] versioned regression dataset with citation/support/abstention/answer-term metrics
-- [ ] provider adapters with token/cost/latency accounting
+- [x] provider token/cost/latency accounting
 - [ ] durable background ingestion jobs
 - [ ] multi-tenant isolation
 - [ ] OpenTelemetry/metrics and evaluation dashboard
 
 ## Next highest-value task
 
-Implement a measured semantic/vector adapter behind the existing retriever port and evaluate it against the versioned regression dataset. Then add provider token/cost/latency accounting while preserving separate retrieval, citation-support, and model-quality metrics.
+Implement a measured semantic/vector adapter behind the existing retriever port and evaluate it against the versioned regression dataset. After that, add durable background ingestion jobs and tenant isolation while preserving deterministic CI and separate retrieval, citation-support, provider-operations, and model-quality metrics.
