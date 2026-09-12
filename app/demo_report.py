@@ -84,6 +84,7 @@ def build_demo_report_html() -> str:
         RAG_REGRESSION_DOCUMENTS,
         RAG_REGRESSION_EXAMPLES,
     )
+    evidence_decision_accuracy = _pct(metrics.evidence_decision_accuracy)
 
     case_rows: list[str] = []
     for case in RAG_REGRESSION_EXAMPLES:
@@ -135,7 +136,7 @@ def build_demo_report_html() -> str:
     <span>Citation recall</span><strong>{_pct(metrics.citation_recall)}</strong>
   </div>
   <div class="card">
-    <span>Abstention accuracy</span><strong>{_pct(metrics.abstention_accuracy)}</strong>
+    <span>Evidence decision accuracy</span><strong>{evidence_decision_accuracy}</strong>
   </div>
   <div class="card">
     <span>Supported answers</span><strong>{_pct(metrics.supported_answer_rate)}</strong>
@@ -156,7 +157,9 @@ def build_demo_report_html() -> str:
 <section class="panel">
   <h2>What these numbers mean</h2>
   <p class="sub">
-    Citation metrics compare returned chunk IDs with hand-authored expected evidence.
+    Evidence-decision accuracy checks whether answerable cases are grounded and
+    abstention cases have no citations. Citation metrics compare returned chunk IDs with
+    hand-authored expected evidence.
     Supported-answer rate checks whether the deterministic extractive answer is contained
     in cited evidence. These are application regression metrics, {SEMANTIC_GROUNDEDNESS_SCOPE}.
   </p>

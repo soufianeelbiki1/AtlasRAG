@@ -36,7 +36,8 @@ The report is generated from the same credential-free regression path exercised 
 - reciprocal-rank fusion across multiple retriever ports;
 - separate reranker interface;
 - precision@k, recall@k and MRR;
-- versioned regression data for citation precision/recall, abstention behavior, expected answer terms and evidence support.
+- versioned regression data for citation precision/recall, evidence-decision accuracy
+  (grounded answer vs clean abstention), expected answer terms and evidence support.
 
 A semantic/vector retriever is not implemented yet, so the repository does not present hybrid orchestration as measured vector-search quality.
 

@@ -36,7 +36,7 @@ class RagRegressionMetrics:
     evaluated: int
     citation_precision: float
     citation_recall: float
-    abstention_accuracy: float
+    evidence_decision_accuracy: float
     supported_answer_rate: float
     answer_term_recall: float
 
@@ -58,7 +58,7 @@ def evaluate_rag_regression(
     document_by_id = _index_documents(documents)
     citation_precision_total = 0.0
     citation_recall_total = 0.0
-    abstention_correct = 0
+    evidence_decisions_correct = 0
     supported_answers = 0
     answerable_responses = 0
     term_recall_total = 0.0
@@ -70,11 +70,11 @@ def evaluate_rag_regression(
 
         if case.should_abstain:
             if not response.grounded and not cited_ids:
-                abstention_correct += 1
+                evidence_decisions_correct += 1
             continue
 
         if response.grounded:
-            abstention_correct += 1
+            evidence_decisions_correct += 1
         hits = sum(chunk_id in case.relevant_ids for chunk_id in cited_ids)
         if cited_ids:
             citation_precision_total += hits / len(cited_ids)
@@ -103,7 +103,7 @@ def evaluate_rag_regression(
             citation_precision_total / answerable_cases if answerable_cases else 0.0
         ),
         citation_recall=citation_recall_total / answerable_cases if answerable_cases else 0.0,
-        abstention_accuracy=abstention_correct / len(cases),
+        evidence_decision_accuracy=evidence_decisions_correct / len(cases),
         supported_answer_rate=(
             supported_answers / answerable_responses if answerable_responses else 0.0
         ),
