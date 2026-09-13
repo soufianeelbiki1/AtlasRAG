@@ -9,7 +9,7 @@ def test_demo_report_contains_regression_metrics_and_cases() -> None:
     assert "RAG evaluation" in html
     assert "Citation precision" in html
     assert "Citation recall" in html
-    assert "Abstention accuracy" in html
+    assert "Evidence decision accuracy" in html
     assert "Supported answers" in html
     assert "What is the passport office opening time?" in html
     assert "abstained" in html

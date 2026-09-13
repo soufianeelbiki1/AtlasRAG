@@ -31,7 +31,7 @@ def test_reference_query_service_meets_regression_contract() -> None:
     assert metrics.evaluated == 4
     assert metrics.citation_precision == pytest.approx(1.0)
     assert metrics.citation_recall == pytest.approx(1.0)
-    assert metrics.abstention_accuracy == pytest.approx(1.0)
+    assert metrics.evidence_decision_accuracy == pytest.approx(1.0)
     assert metrics.supported_answer_rate == pytest.approx(1.0)
     assert metrics.answer_term_recall == pytest.approx(1.0)
 
@@ -65,6 +65,25 @@ def test_application_metrics_detect_irrelevant_citations() -> None:
 
     assert metrics.citation_precision < 1.0
     assert metrics.citation_recall == pytest.approx(1.0)
+
+
+def test_evidence_decision_accuracy_detects_abstaining_on_answerable_cases() -> None:
+    service = QueryService(
+        InMemoryRetriever(RAG_REGRESSION_DOCUMENTS),
+        ExtractiveAnswerGenerator(),
+        minimum_evidence_score=1.0,
+    )
+
+    metrics = evaluate_rag_regression(
+        service,
+        RAG_REGRESSION_DOCUMENTS,
+        RAG_REGRESSION_EXAMPLES,
+        top_k=2,
+    )
+
+    assert metrics.evidence_decision_accuracy == pytest.approx(0.25)
+    assert metrics.citation_precision == pytest.approx(0.0)
+    assert metrics.citation_recall == pytest.approx(0.0)
 
 
 def test_regression_contract_rejects_invalid_cases_and_duplicate_documents() -> None:
