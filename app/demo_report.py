@@ -4,9 +4,9 @@ import argparse
 from html import escape
 from pathlib import Path
 
-from app.models import QueryRequest
+from app.models import QueryRequest, QueryResponse
 from app.query_service import ExtractiveAnswerGenerator, QueryService
-from app.rag_evaluation import evaluate_rag_regression
+from app.rag_evaluation import RagRegressionExample, evaluate_rag_regression
 from app.regression_dataset import (
     RAG_REGRESSION_DATASET_PROVENANCE,
     RAG_REGRESSION_DATASET_VERSION,
@@ -32,7 +32,7 @@ h2 { margin: 0 0 15px; font-size: 1.15rem; }
 .note { color: #707a89; font-size: .82rem; line-height: 1.5; }
 .cards {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
   gap: 12px;
   margin: 24px 0;
 }
@@ -45,6 +45,7 @@ h2 { margin: 0 0 15px; font-size: 1.15rem; }
 .card { padding: 16px; }
 .card span { display: block; color: #707a89; font-size: .75rem; text-transform: uppercase; }
 .card strong { display: block; margin-top: 8px; font-size: 1.45rem; }
+.card small { display: block; margin-top: 6px; color: #707a89; }
 .panel { padding: 20px; margin-top: 18px; overflow: auto; }
 table { width: 100%; border-collapse: collapse; font-size: .88rem; }
 th, td {
@@ -55,12 +56,11 @@ th, td {
 }
 th { color: #707a89; font-weight: 600; }
 .badge { display: inline-block; padding: 3px 8px; border-radius: 999px; background: #eef2f6; }
-.badge-yes { background: #dcfce7; }
-.badge-no { background: #fef3c7; }
+.badge-pass { background: #dcfce7; }
+.badge-fail { background: #fee2e2; }
 .answer { max-width: 420px; line-height: 1.45; }
 .citations { min-width: 210px; }
 .citation { display: block; margin-bottom: 5px; }
-@media (max-width: 900px) { .cards { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 520px) { .cards { grid-template-columns: 1fr; } }
 """
 
@@ -75,6 +75,19 @@ def _service() -> QueryService:
         ExtractiveAnswerGenerator(),
         minimum_evidence_score=0.25,
     )
+
+
+def _decision_outcome(
+    case: RagRegressionExample,
+    response: QueryResponse,
+) -> tuple[str, bool]:
+    if case.should_abstain:
+        if not response.grounded and not response.citations:
+            return "safe abstention", True
+        return "unsafe answer", False
+    if response.grounded:
+        return "grounded answer", True
+    return "false abstention", False
 
 
 def build_demo_report_html() -> str:
@@ -97,13 +110,13 @@ def build_demo_report_html() -> str:
             or "—"
         )
         expected = "abstain" if case.should_abstain else ", ".join(sorted(case.relevant_ids))
-        badge_class = "badge-yes" if response.grounded else "badge-no"
+        outcome, decision_correct = _decision_outcome(case, response)
+        badge_class = "badge-pass" if decision_correct else "badge-fail"
         case_rows.append(
             "<tr>"
             f"<td>{escape(case.question)}</td>"
             f"<td>{escape(expected)}</td>"
-            f'<td><span class="badge {badge_class}">'
-            f"{'grounded' if response.grounded else 'abstained'}</span></td>"
+            f'<td><span class="badge {badge_class}">{outcome}</span></td>'
             f'<td class="citations">{citations}</td>'
             f'<td class="answer">{escape(response.answer)}</td>'
             "</tr>"
@@ -139,6 +152,14 @@ def build_demo_report_html() -> str:
     <span>Evidence decision accuracy</span><strong>{evidence_decision_accuracy}</strong>
   </div>
   <div class="card">
+    <span>Answerable grounded</span><strong>{_pct(metrics.answerable_grounding_rate)}</strong>
+    <small>{metrics.correct_grounded_answers} of {metrics.answerable_cases}</small>
+  </div>
+  <div class="card">
+    <span>Safe abstentions</span><strong>{_pct(metrics.safe_abstention_rate)}</strong>
+    <small>{metrics.correct_abstentions} of {metrics.abstention_cases}</small>
+  </div>
+  <div class="card">
     <span>Supported answers</span><strong>{_pct(metrics.supported_answer_rate)}</strong>
   </div>
 </section>
@@ -160,8 +181,14 @@ def build_demo_report_html() -> str:
     Evidence-decision accuracy checks whether answerable cases are grounded and
     abstention cases have no citations. Citation metrics compare returned chunk IDs with
     hand-authored expected evidence.
+    Answerable-grounding and safe-abstention rates split the decision score so missed
+    answers and unsafe answers cannot hide inside one aggregate.
     Supported-answer rate checks whether the deterministic extractive answer is contained
     in cited evidence. These are application regression metrics, {SEMANTIC_GROUNDEDNESS_SCOPE}.
+  </p>
+  <p class="note">
+    Observed failures: {metrics.false_abstentions} false abstentions ·
+    {metrics.unsafe_answers} unsafe answers.
   </p>
   <p class="note">{escape(RAG_REGRESSION_DATASET_PROVENANCE)}</p>
 </section>

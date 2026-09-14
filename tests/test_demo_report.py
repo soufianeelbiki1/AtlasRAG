@@ -10,9 +10,15 @@ def test_demo_report_contains_regression_metrics_and_cases() -> None:
     assert "Citation precision" in html
     assert "Citation recall" in html
     assert "Evidence decision accuracy" in html
+    assert "Answerable grounded" in html
+    assert "Safe abstentions" in html
+    assert "3 of 3" in html
+    assert "1 of 1" in html
     assert "Supported answers" in html
     assert "What is the passport office opening time?" in html
-    assert "abstained" in html
+    assert "safe abstention" in html
+    assert "0 false abstentions" in html
+    assert "0 unsafe answers" in html
     assert "application regression metrics" in html
     assert "not model-based semantic groundedness scores" in html
 

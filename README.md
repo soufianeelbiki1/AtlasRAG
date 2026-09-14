@@ -26,7 +26,7 @@ Generate a standalone HTML regression report:
 python -m app.demo_report --output build/atlasrag-evaluation.html
 ```
 
-Open the generated file in a browser. It shows the versioned deterministic regression cases, expected evidence, grounded/abstained outcome, returned citations and the extractive answer alongside aggregate citation precision/recall, abstention accuracy and supported-answer rate.
+Open the generated file in a browser. It shows the versioned deterministic regression cases, expected evidence, grounded/abstained outcome, returned citations and the extractive answer alongside aggregate citation precision/recall, evidence-decision accuracy, answerable-grounding rate, safe-abstention rate and supported-answer rate.
 
 The report is generated from the same credential-free regression path exercised in tests. Its metrics compare returned chunk IDs and deterministic answer support against hand-authored expectations; they are application regression checks, not model-based semantic groundedness scores.
 
@@ -36,8 +36,9 @@ The report is generated from the same credential-free regression path exercised 
 - reciprocal-rank fusion across multiple retriever ports;
 - separate reranker interface;
 - precision@k, recall@k and MRR;
-- versioned regression data for citation precision/recall, evidence-decision accuracy
-  (grounded answer vs clean abstention), expected answer terms and evidence support.
+- versioned regression data for citation precision/recall, evidence-decision accuracy,
+  separate answerable-grounding and safe-abstention rates, expected answer terms and
+  evidence support. Duplicate citations cannot inflate recall above 100%.
 
 A semantic/vector retriever is not implemented yet, so the repository does not present hybrid orchestration as measured vector-search quality.
 

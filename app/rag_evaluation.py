@@ -9,10 +9,14 @@ groundedness or human-quality judgment.
 import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
+from typing import Protocol
 
-from app.models import QueryRequest
-from app.query_service import QueryService
+from app.models import QueryRequest, QueryResponse
 from app.retrieval import SeedDocument
+
+
+class QueryRunner(Protocol):
+    def query(self, request: QueryRequest) -> QueryResponse: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,15 +38,23 @@ class RagRegressionExample:
 @dataclass(frozen=True, slots=True)
 class RagRegressionMetrics:
     evaluated: int
+    answerable_cases: int
+    abstention_cases: int
+    correct_grounded_answers: int
+    false_abstentions: int
+    correct_abstentions: int
+    unsafe_answers: int
     citation_precision: float
     citation_recall: float
     evidence_decision_accuracy: float
+    answerable_grounding_rate: float
+    safe_abstention_rate: float
     supported_answer_rate: float
     answer_term_recall: float
 
 
 def evaluate_rag_regression(
-    service: QueryService,
+    service: QueryRunner,
     documents: Iterable[SeedDocument],
     examples: Iterable[RagRegressionExample],
     *,
@@ -58,7 +70,10 @@ def evaluate_rag_regression(
     document_by_id = _index_documents(documents)
     citation_precision_total = 0.0
     citation_recall_total = 0.0
-    evidence_decisions_correct = 0
+    correct_grounded_answers = 0
+    false_abstentions = 0
+    correct_abstentions = 0
+    unsafe_answers = 0
     supported_answers = 0
     answerable_responses = 0
     term_recall_total = 0.0
@@ -70,12 +85,22 @@ def evaluate_rag_regression(
 
         if case.should_abstain:
             if not response.grounded and not cited_ids:
-                evidence_decisions_correct += 1
+                correct_abstentions += 1
+            else:
+                unsafe_answers += 1
             continue
 
         if response.grounded:
-            evidence_decisions_correct += 1
-        hits = sum(chunk_id in case.relevant_ids for chunk_id in cited_ids)
+            correct_grounded_answers += 1
+        else:
+            false_abstentions += 1
+
+        seen_relevant_ids: set[str] = set()
+        hits = 0
+        for chunk_id in cited_ids:
+            if chunk_id in case.relevant_ids and chunk_id not in seen_relevant_ids:
+                seen_relevant_ids.add(chunk_id)
+                hits += 1
         if cited_ids:
             citation_precision_total += hits / len(cited_ids)
         citation_recall_total += hits / len(case.relevant_ids)
@@ -97,13 +122,25 @@ def evaluate_rag_regression(
                 term_recall_total += sum(term in answer_terms for term in expected) / len(expected)
 
     answerable_cases = sum(not case.should_abstain for case in cases)
+    abstention_cases = len(cases) - answerable_cases
+    evidence_decisions_correct = correct_grounded_answers + correct_abstentions
     return RagRegressionMetrics(
         evaluated=len(cases),
+        answerable_cases=answerable_cases,
+        abstention_cases=abstention_cases,
+        correct_grounded_answers=correct_grounded_answers,
+        false_abstentions=false_abstentions,
+        correct_abstentions=correct_abstentions,
+        unsafe_answers=unsafe_answers,
         citation_precision=(
             citation_precision_total / answerable_cases if answerable_cases else 0.0
         ),
         citation_recall=citation_recall_total / answerable_cases if answerable_cases else 0.0,
         evidence_decision_accuracy=evidence_decisions_correct / len(cases),
+        answerable_grounding_rate=(
+            correct_grounded_answers / answerable_cases if answerable_cases else 0.0
+        ),
+        safe_abstention_rate=(correct_abstentions / abstention_cases if abstention_cases else 0.0),
         supported_answer_rate=(
             supported_answers / answerable_responses if answerable_responses else 0.0
         ),
