@@ -43,7 +43,7 @@ class RagRegressionMetrics:
     correct_grounded_answers: int
     false_abstentions: int
     correct_abstentions: int
-    unsafe_answers: int
+    unsafe_evidence_responses: int
     citation_precision: float
     citation_recall: float
     evidence_decision_accuracy: float
@@ -73,7 +73,7 @@ def evaluate_rag_regression(
     correct_grounded_answers = 0
     false_abstentions = 0
     correct_abstentions = 0
-    unsafe_answers = 0
+    unsafe_evidence_responses = 0
     supported_answers = 0
     answerable_responses = 0
     term_recall_total = 0.0
@@ -87,7 +87,7 @@ def evaluate_rag_regression(
             if not response.grounded and not cited_ids:
                 correct_abstentions += 1
             else:
-                unsafe_answers += 1
+                unsafe_evidence_responses += 1
             continue
 
         if response.grounded:
@@ -131,7 +131,7 @@ def evaluate_rag_regression(
         correct_grounded_answers=correct_grounded_answers,
         false_abstentions=false_abstentions,
         correct_abstentions=correct_abstentions,
-        unsafe_answers=unsafe_answers,
+        unsafe_evidence_responses=unsafe_evidence_responses,
         citation_precision=(
             citation_precision_total / answerable_cases if answerable_cases else 0.0
         ),

@@ -84,7 +84,7 @@ def _decision_outcome(
     if case.should_abstain:
         if not response.grounded and not response.citations:
             return "safe abstention", True
-        return "unsafe answer", False
+        return "unsafe evidence response", False
     if response.grounded:
         return "grounded answer", True
     return "false abstention", False
@@ -182,13 +182,13 @@ def build_demo_report_html() -> str:
     abstention cases have no citations. Citation metrics compare returned chunk IDs with
     hand-authored expected evidence.
     Answerable-grounding and safe-abstention rates split the decision score so missed
-    answers and unsafe answers cannot hide inside one aggregate.
+    answers and unsafe evidence responses cannot hide inside one aggregate.
     Supported-answer rate checks whether the deterministic extractive answer is contained
     in cited evidence. These are application regression metrics, {SEMANTIC_GROUNDEDNESS_SCOPE}.
   </p>
   <p class="note">
     Observed failures: {metrics.false_abstentions} false abstentions ·
-    {metrics.unsafe_answers} unsafe answers.
+    {metrics.unsafe_evidence_responses} unsafe evidence responses.
   </p>
   <p class="note">{escape(RAG_REGRESSION_DATASET_PROVENANCE)}</p>
 </section>

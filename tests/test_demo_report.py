@@ -18,7 +18,7 @@ def test_demo_report_contains_regression_metrics_and_cases() -> None:
     assert "What is the passport office opening time?" in html
     assert "safe abstention" in html
     assert "0 false abstentions" in html
-    assert "0 unsafe answers" in html
+    assert "0 unsafe evidence responses" in html
     assert "application regression metrics" in html
     assert "not model-based semantic groundedness scores" in html
 

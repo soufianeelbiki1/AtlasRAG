@@ -38,7 +38,7 @@ def test_reference_query_service_meets_regression_contract() -> None:
     assert metrics.correct_grounded_answers == 3
     assert metrics.false_abstentions == 0
     assert metrics.correct_abstentions == 1
-    assert metrics.unsafe_answers == 0
+    assert metrics.unsafe_evidence_responses == 0
     assert metrics.supported_answer_rate == pytest.approx(1.0)
     assert metrics.answer_term_recall == pytest.approx(1.0)
 
@@ -96,7 +96,7 @@ def test_evidence_decision_accuracy_detects_abstaining_on_answerable_cases() -> 
     assert metrics.correct_grounded_answers == 0
     assert metrics.false_abstentions == 3
     assert metrics.correct_abstentions == 1
-    assert metrics.unsafe_answers == 0
+    assert metrics.unsafe_evidence_responses == 0
 
 
 class _StaticQueryService:
@@ -107,7 +107,7 @@ class _StaticQueryService:
         return self._responses[request.question]
 
 
-def test_decision_breakdown_distinguishes_unsafe_answers_from_false_abstentions() -> None:
+def test_decision_breakdown_distinguishes_unsafe_evidence_from_false_abstentions() -> None:
     answerable = RagRegressionExample(
         question="answerable question",
         relevant_ids=frozenset({"payments-idempotency"}),
@@ -152,7 +152,7 @@ def test_decision_breakdown_distinguishes_unsafe_answers_from_false_abstentions(
     assert metrics.correct_grounded_answers == 0
     assert metrics.false_abstentions == 1
     assert metrics.correct_abstentions == 0
-    assert metrics.unsafe_answers == 1
+    assert metrics.unsafe_evidence_responses == 1
 
 
 def test_duplicate_relevant_citations_cannot_inflate_recall() -> None:
